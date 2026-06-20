@@ -6,6 +6,7 @@ import DeliveriesListPage from '../pages/Deliveries/DeliveriesListPage';
 import DeliveryDetailPage from '../pages/Deliveries/DeliveryDetailPage';
 import LoginPage from '../pages/Login/LoginPage';
 import NotFoundPage from '../pages/NotFound/NotFoundPage';
+import PromosListPage from '../pages/Promos/PromosListPage';
 import ProtectedRoute from '../layout/ProtectedRoute';
 
 export const router = createBrowserRouter([
@@ -16,7 +17,7 @@ export const router = createBrowserRouter([
       { path: '/', element: <DashboardPage /> },
       { path: '/deliveries', element: <DeliveriesListPage /> },
       { path: '/deliveries/:id', element: <DeliveryDetailPage /> },
-      { path: '/promos', element: <ComingSoonPage title="Promos" /> },
+      { path: '/promos', element: <PromosListPage /> },
       { path: '/users', element: <ComingSoonPage title="Users" /> },
       { path: '/support', element: <ComingSoonPage title="Support" /> },
     ],
