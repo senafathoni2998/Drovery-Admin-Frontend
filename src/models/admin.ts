@@ -3,12 +3,102 @@
 // the extended DeliveryResponseDto / SupportChatMessageDto are read in full.)
 import type {
   DeliveryFailureReason,
+  DeliveryStatus,
   DroneCommandStatus,
   DroneCommandType,
+  PaymentStatus,
   PromoDiscountType,
   Role,
   SupportTicketStatus,
+  TrackingSource,
 } from './enums';
+
+// ── Deliveries (admin oversight) — mirror of DeliveryResponseDto + the admin extras. ─────
+// Dates arrive as ISO strings over JSON.
+
+export interface AdminDeliveryUser {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface PaymentSummary {
+  id: string;
+  deliveryId: string;
+  stripePaymentIntentId: string | null;
+  amount: number;
+  currency: string;
+  status: PaymentStatus;
+  createdAt: string;
+}
+
+export interface DeliveryTracking {
+  id: string;
+  deliveryId: string;
+  droneLat: number | null;
+  droneLng: number | null;
+  droneStatus: string | null;
+  /** Encoded route geometry, when available (unused by the console today). */
+  routeJson: Record<string, unknown> | null;
+  eta: string | null;
+  updatedAt: string;
+}
+
+export interface ProofOfDelivery {
+  id: string;
+  deliveryId: string;
+  photoUrl: string;
+  recipientName: string | null;
+  lat: number | null;
+  lng: number | null;
+  notes: string | null;
+  capturedAt: string;
+}
+
+export interface DeliveryRating {
+  id: string;
+  deliveryId: string;
+  userId: string;
+  stars: number;
+  comment: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminDelivery {
+  id: string;
+  trackingId: string;
+  userId: string;
+  status: DeliveryStatus;
+  trackingSource: TrackingSource;
+  assignedDroneId: string | null;
+  failureReason: DeliveryFailureReason | null;
+  fromAddress: string;
+  toAddress: string;
+  fromLat: number | null;
+  fromLng: number | null;
+  toLat: number | null;
+  toLng: number | null;
+  receiver: string;
+  packages: string;
+  packageSize: string;
+  packageWeight: number;
+  packageTypes: string[];
+  pickupDate: string;
+  pickupTime: string;
+  scheduledFor: string | null;
+  estimatedDelivery: string | null;
+  estimatedPrice: number;
+  handoffConfirmedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  // Relations: user + payment on list rows; + tracking/proof/rating on detail.
+  user?: AdminDeliveryUser | null;
+  payment?: PaymentSummary | null;
+  tracking?: DeliveryTracking | null;
+  proofOfDelivery?: ProofOfDelivery | null;
+  rating?: DeliveryRating | null;
+}
 
 // GET /admin/overview
 export interface AdminOverview {
