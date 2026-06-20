@@ -9,6 +9,7 @@ import type {
   PaymentStatus,
   PromoDiscountType,
   Role,
+  SupportChatSenderRole,
   SupportTicketStatus,
   TrackingSource,
 } from './enums';
@@ -222,4 +223,27 @@ export interface AdminSupportTicketStatusRow {
   lastMessageAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+// A single message in a ticket thread (USER / AGENT / SYSTEM). createdAt is an ISO string.
+export interface SupportChatMessage {
+  id: string;
+  ticketId: string;
+  senderRole: SupportChatSenderRole;
+  senderUserId: string | null;
+  content: string;
+  createdAt: string;
+}
+
+// GET /admin/support/tickets/:id — full ticket + user + message thread.
+export interface AdminSupportTicketDetail {
+  id: string;
+  userId: string;
+  message: string;
+  status: SupportTicketStatus;
+  lastMessageAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user: AdminTicketUser;
+  messages: SupportChatMessage[];
 }
