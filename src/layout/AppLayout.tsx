@@ -17,8 +17,10 @@ import {
   Typography,
 } from '@mui/material';
 import type { ReactNode } from 'react';
+import { Suspense } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 
+import PageLoader from '../components/PageLoader';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { logout } from '../features/auth/authSlice';
 import type { Role } from '../models/enums';
@@ -128,7 +130,9 @@ export default function AppLayout() {
 
       <Box component="main" sx={{ flexGrow: 1, p: 3, width: 0 }}>
         <Toolbar />
-        <Outlet />
+        <Suspense fallback={<PageLoader />}>
+          <Outlet />
+        </Suspense>
       </Box>
     </Box>
   );
