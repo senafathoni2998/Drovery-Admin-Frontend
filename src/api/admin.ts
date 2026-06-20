@@ -1,7 +1,10 @@
 import type {
   AdminDelivery,
   AdminRefundResponse,
+  CreatePromoBody,
   DroneCommandResponse,
+  PromoResponse,
+  UpdatePromoBody,
 } from '../models/admin';
 import type { DeliveryFailureReason, DroneCommandType } from '../models/enums';
 import { apiFetch } from './client';
@@ -34,4 +37,10 @@ export const adminApi = {
       method: 'POST',
       body,
     }),
+
+  createPromo: (body: CreatePromoBody) =>
+    apiFetch<PromoResponse>('/admin/promos', { method: 'POST', body }),
+
+  updatePromo: (id: string, body: UpdatePromoBody) =>
+    apiFetch<PromoResponse>(`/admin/promos/${id}`, { method: 'PATCH', body }),
 };
