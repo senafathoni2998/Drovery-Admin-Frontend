@@ -43,5 +43,10 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
+    // MUI dialog/select/portal render tests are heavy; the default 5s test timeout is too
+    // tight when many files run in parallel on a small box (CPU contention inflates each
+    // test's wall-clock). Give generous headroom.
+    testTimeout: 20000,
+    hookTimeout: 20000,
   },
 });
