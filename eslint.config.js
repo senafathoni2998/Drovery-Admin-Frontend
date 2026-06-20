@@ -36,7 +36,13 @@ export default [
     },
   },
   {
-    files: ['**/*.{test,spec}.{ts,tsx}', 'src/setupTests.ts'],
-    languageOptions: { globals: { ...globals.node } },
+    files: [
+      '**/*.{test,spec}.{ts,tsx}',
+      'src/setupTests.ts',
+      'src/test/**/*.{ts,tsx}',
+    ],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+    // Test files + test utils export helpers/fixtures, not just components.
+    rules: { 'react-refresh/only-export-components': 'off' },
   },
 ];
