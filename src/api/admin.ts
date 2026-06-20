@@ -1,16 +1,19 @@
 import type {
   AdminDelivery,
   AdminRefundResponse,
+  AdminSupportTicketStatusRow,
   AdminUserRole,
   CreatePromoBody,
   DroneCommandResponse,
   PromoResponse,
+  SupportChatMessage,
   UpdatePromoBody,
 } from '../models/admin';
 import type {
   DeliveryFailureReason,
   DroneCommandType,
   Role,
+  SupportTicketStatus,
 } from '../models/enums';
 import { apiFetch } from './client';
 
@@ -54,4 +57,16 @@ export const adminApi = {
       method: 'PATCH',
       body: { role },
     }),
+
+  replyToTicket: (id: string, content: string) =>
+    apiFetch<SupportChatMessage>(`/admin/support/tickets/${id}/messages`, {
+      method: 'POST',
+      body: { content },
+    }),
+
+  setTicketStatus: (id: string, status: SupportTicketStatus) =>
+    apiFetch<AdminSupportTicketStatusRow>(
+      `/admin/support/tickets/${id}/status`,
+      { method: 'PATCH', body: { status } },
+    ),
 };
