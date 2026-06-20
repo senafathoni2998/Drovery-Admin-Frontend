@@ -46,6 +46,30 @@ export type PromoDiscountType = 'PERCENT' | 'FIXED';
 
 export type SupportTicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
 
+export const SUPPORT_TICKET_STATUSES: SupportTicketStatus[] = [
+  'OPEN',
+  'IN_PROGRESS',
+  'RESOLVED',
+  'CLOSED',
+];
+
+export type SupportChatSenderRole = 'USER' | 'AGENT' | 'SYSTEM';
+
+export function ticketStatusColor(
+  status: SupportTicketStatus,
+): 'info' | 'warning' | 'success' | 'default' {
+  switch (status) {
+    case 'OPEN':
+      return 'info';
+    case 'IN_PROGRESS':
+      return 'warning';
+    case 'RESOLVED':
+      return 'success';
+    case 'CLOSED':
+      return 'default';
+  }
+}
+
 export type TrackingSource = 'SIMULATED' | 'LIVE';
 
 export type PaymentStatus =
