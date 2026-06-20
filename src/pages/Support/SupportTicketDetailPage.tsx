@@ -16,10 +16,11 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router';
 
 import { adminApi } from '../../api/admin';
+import { useSupportSocket } from '../../features/support/useSupportSocket';
 import { useApi } from '../../hooks/useApi';
 import { useMutation } from '../../hooks/useMutation';
 import type {
@@ -84,6 +85,21 @@ export default function SupportTicketDetailPage() {
   const replyM = useMutation(adminApi.replyToTicket);
   const statusM = useMutation(adminApi.setTicketStatus);
 
+  // Live thread: messages arriving over the WS (customer messages + the echo of our own
+  // replies), layered on top of the REST-loaded thread and deduped by id.
+  const [liveMessages, setLiveMessages] = useState<SupportChatMessage[]>([]);
+  const appendMessage = useCallback((m: SupportChatMessage) => {
+    setLiveMessages((prev) =>
+      prev.some((x) => x.id === m.id) ? prev : [...prev, m],
+    );
+  }, []);
+  const socketStatus = useSupportSocket(id, appendMessage);
+  useEffect(() => {
+    // Drop live messages from a previously-viewed ticket.
+    /* eslint-disable-next-line react-hooks/set-state-in-effect */
+    setLiveMessages([]);
+  }, [id]);
+
   if (!id) return <Navigate to="/support" replace />;
 
   if (loading && !ticket) {
@@ -122,6 +138,15 @@ export default function SupportTicketDetailPage() {
 
   const closed = ticket.status === 'CLOSED';
 
+  // The REST-loaded thread is the base; live WS messages (and our own replies) are layered on
+  // top, deduped by id, sorted by time (ISO strings sort chronologically).
+  const byId = new Map<string, SupportChatMessage>();
+  for (const m of ticket.messages) byId.set(m.id, m);
+  for (const m of liveMessages) byId.set(m.id, m);
+  const thread = [...byId.values()].sort((a, b) =>
+    a.createdAt.localeCompare(b.createdAt),
+  );
+
   const onStatusChange = async (next: SupportTicketStatus) => {
     if (next === ticket.status) return;
     if (await statusM.run(ticket.id, next)) refetch();
@@ -130,8 +155,11 @@ export default function SupportTicketDetailPage() {
   const onSend = async () => {
     const content = reply.trim();
     if (!content) return;
-    if (await replyM.run(ticket.id, content)) {
+    const sent = await replyM.run(ticket.id, content);
+    if (sent) {
       setReply('');
+      // Show it immediately; the WS echo (same id) dedupes. Refetch keeps status fresh.
+      appendMessage(sent);
       refetch();
     }
   };
@@ -149,6 +177,18 @@ export default function SupportTicketDetailPage() {
         <Chip
           label={humanizeEnum(ticket.status)}
           color={ticketStatusColor(ticket.status)}
+          size="small"
+        />
+        <Chip
+          label={
+            socketStatus === 'live'
+              ? '● Live'
+              : socketStatus === 'connecting'
+                ? 'Connecting…'
+                : 'Offline'
+          }
+          color={socketStatus === 'live' ? 'success' : 'default'}
+          variant="outlined"
           size="small"
         />
         <Box sx={{ flexGrow: 1 }} />
@@ -180,8 +220,8 @@ export default function SupportTicketDetailPage() {
       <Card>
         <CardContent>
           <Stack spacing={1.5}>
-            {ticket.messages.length > 0 ? (
-              ticket.messages.map((m) => (
+            {thread.length > 0 ? (
+              thread.map((m) => (
                 <MessageBubble key={m.id} m={m} customerName={ticket.user.name} />
               ))
             ) : (
