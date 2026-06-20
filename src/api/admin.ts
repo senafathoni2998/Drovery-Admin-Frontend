@@ -1,12 +1,17 @@
 import type {
   AdminDelivery,
   AdminRefundResponse,
+  AdminUserRole,
   CreatePromoBody,
   DroneCommandResponse,
   PromoResponse,
   UpdatePromoBody,
 } from '../models/admin';
-import type { DeliveryFailureReason, DroneCommandType } from '../models/enums';
+import type {
+  DeliveryFailureReason,
+  DroneCommandType,
+  Role,
+} from '../models/enums';
 import { apiFetch } from './client';
 
 // Admin mutations (the operator actions). Read endpoints (list/detail/command-history) go
@@ -43,4 +48,10 @@ export const adminApi = {
 
   updatePromo: (id: string, body: UpdatePromoBody) =>
     apiFetch<PromoResponse>(`/admin/promos/${id}`, { method: 'PATCH', body }),
+
+  setRole: (id: string, role: Role) =>
+    apiFetch<AdminUserRole>(`/admin/users/${id}/role`, {
+      method: 'PATCH',
+      body: { role },
+    }),
 };
