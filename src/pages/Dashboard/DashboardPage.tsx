@@ -13,22 +13,12 @@ import {
 
 import { useApi } from '../../hooks/useApi';
 import type { AdminOverview } from '../../models/admin';
-import type { DeliveryStatus, StatusTone } from '../../models/enums';
+import type { DeliveryStatus } from '../../models/enums';
 import {
   DELIVERY_STATUSES,
-  deliveryStatusTone,
+  deliveryStatusColor,
   humanizeEnum,
 } from '../../models/enums';
-
-type ChipColor = 'default' | 'info' | 'success' | 'error' | 'warning';
-
-const TONE_COLOR: Record<StatusTone, ChipColor> = {
-  neutral: 'default',
-  active: 'info',
-  success: 'success',
-  error: 'error',
-  warning: 'warning',
-};
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
@@ -114,7 +104,7 @@ export default function DashboardPage() {
                     <Chip
                       key={status}
                       label={`${humanizeEnum(status)}: ${count}`}
-                      color={TONE_COLOR[deliveryStatusTone(status)]}
+                      color={deliveryStatusColor(status)}
                       variant={count > 0 ? 'filled' : 'outlined'}
                       size="small"
                     />
