@@ -1,6 +1,7 @@
 # Drovery Admin
 
 [![CI](https://github.com/senafathoni2998/Drovery-Admin-Frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/senafathoni2998/Drovery-Admin-Frontend/actions/workflows/ci.yml)
+[![Publish image](https://github.com/senafathoni2998/Drovery-Admin-Frontend/actions/workflows/publish.yml/badge.svg)](https://github.com/senafathoni2998/Drovery-Admin-Frontend/actions/workflows/publish.yml)
 
 The operator & support web console for [Drovery](../drovery-backend) — a React SPA that talks
 to the backend's role-gated `/admin` API. Sibling to `drovery-backend` (the API) and
