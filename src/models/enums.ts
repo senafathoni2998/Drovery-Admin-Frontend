@@ -3,6 +3,14 @@
 
 export type Role = 'USER' | 'AGENT' | 'ADMIN';
 
+export const ROLES: Role[] = ['USER', 'AGENT', 'ADMIN'];
+
+export function roleColor(role: Role): 'default' | 'info' | 'primary' {
+  if (role === 'ADMIN') return 'primary';
+  if (role === 'AGENT') return 'info';
+  return 'default';
+}
+
 export type DeliveryStatus =
   | 'SCHEDULED'
   | 'PENDING'
