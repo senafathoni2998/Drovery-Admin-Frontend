@@ -80,8 +80,16 @@ export function openSupportSocket(opts: OpenSupportOptions): SupportConnection {
   try {
     wsBaseUrl = opts.wsBaseUrl ?? deriveWsBaseUrl(API_BASE_URL);
   } catch {
-    queueMicrotask(() => callbacks.onUnavailable('connect-error'));
-    return { close: () => {} };
+    // A RELATIVE API base (e.g. '/api/v1' in same-origin prod behind a reverse proxy) has no
+    // host for deriveWsBaseUrl — derive the ws origin from the current page instead (the proxy
+    // forwards /ws/* to the backend). http→ws / https→wss.
+    const origin =
+      typeof window !== 'undefined' ? window.location?.origin : undefined;
+    if (!origin) {
+      queueMicrotask(() => callbacks.onUnavailable('connect-error'));
+      return { close: () => {} };
+    }
+    wsBaseUrl = origin.replace(/^http/, 'ws');
   }
 
   let ws: WebSocket | null = null;
