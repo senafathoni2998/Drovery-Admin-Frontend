@@ -154,6 +154,30 @@ export interface PromoResponse {
   updatedAt: string;
 }
 
+// POST /admin/promos (CreatePromoDto). code is uppercased server-side; dates are ISO strings.
+export interface CreatePromoBody {
+  code: string;
+  description?: string;
+  discountType: PromoDiscountType;
+  discountValue: number;
+  minOrderTotal?: number;
+  maxDiscount?: number;
+  startsAt?: string;
+  endsAt?: string;
+  maxRedemptions?: number;
+}
+
+// PATCH /admin/promos/:id (UpdatePromoDto) — code, discountType and startsAt are NOT editable.
+export interface UpdatePromoBody {
+  description?: string;
+  discountValue?: number;
+  minOrderTotal?: number;
+  maxDiscount?: number;
+  endsAt?: string;
+  maxRedemptions?: number;
+  active?: boolean;
+}
+
 // GET /admin/users
 export interface AdminUserListItem {
   id: string;
