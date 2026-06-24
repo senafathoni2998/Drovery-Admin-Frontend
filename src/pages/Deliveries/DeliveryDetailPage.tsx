@@ -286,6 +286,55 @@ export default function DeliveryDetailPage() {
             <Field label="ETA" value={fmt(d.tracking?.eta)} />
           </SectionCard>
         )}
+
+        {d.proofOfDelivery && (
+          <SectionCard title="Proof of delivery">
+            <Box
+              component="img"
+              src={d.proofOfDelivery.photoUrl}
+              alt="Proof of delivery"
+              sx={{
+                width: '100%',
+                maxHeight: 220,
+                objectFit: 'cover',
+                borderRadius: 1,
+                mb: 1,
+                bgcolor: 'action.hover',
+              }}
+            />
+            <Field
+              label="Recipient"
+              value={d.proofOfDelivery.recipientName ?? '—'}
+            />
+            <Field label="Captured" value={fmt(d.proofOfDelivery.capturedAt)} />
+            <Field
+              label="Location"
+              value={
+                d.proofOfDelivery.lat != null && d.proofOfDelivery.lng != null
+                  ? `${d.proofOfDelivery.lat.toFixed(4)}, ${d.proofOfDelivery.lng.toFixed(4)}`
+                  : '—'
+              }
+            />
+            {d.proofOfDelivery.notes && (
+              <Field label="Notes" value={d.proofOfDelivery.notes} />
+            )}
+          </SectionCard>
+        )}
+
+        {d.rating && (
+          <SectionCard title="Customer rating">
+            <Field
+              label="Rating"
+              value={`${'★'.repeat(d.rating.stars)}${'☆'.repeat(
+                Math.max(0, 5 - d.rating.stars),
+              )}  (${d.rating.stars}/5)`}
+            />
+            {d.rating.comment && (
+              <Field label="Comment" value={d.rating.comment} />
+            )}
+            <Field label="Rated" value={fmt(d.rating.createdAt)} />
+          </SectionCard>
+        )}
       </Box>
 
       <SectionCard title="Operator actions">
