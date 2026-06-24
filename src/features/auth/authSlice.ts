@@ -1,7 +1,12 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 import { apiFetch } from '../../api/client';
-import { clearToken, getToken, setToken } from '../../api/tokenStorage';
+import {
+  clearToken,
+  getRefreshToken,
+  getToken,
+  setTokens,
+} from '../../api/tokenStorage';
 import { ApiError } from '../../models/api';
 import type { CurrentUser, LoginResponse } from '../../models/auth';
 
@@ -26,7 +31,9 @@ const initialState: AuthState = {
 const toMessage = (e: unknown, fallback: string): string =>
   e instanceof ApiError ? e.message : fallback;
 
-// POST /auth/login, persist the token, then resolve the full profile (incl. role) via /users/me.
+// POST /auth/login, persist the access + refresh tokens, then resolve the full profile
+// (incl. role) via /users/me. The refresh token enables transparent session refresh in
+// api/client.ts (so a short-lived access token no longer bounces the operator to /login).
 export const login = createAsyncThunk<
   CurrentUser,
   { email: string; password: string },
@@ -37,7 +44,7 @@ export const login = createAsyncThunk<
       method: 'POST',
       body: creds,
     });
-    setToken(res.accessToken);
+    setTokens(res.accessToken, res.refreshToken);
     return await apiFetch<CurrentUser>('/users/me');
   } catch (e) {
     clearToken();
@@ -62,7 +69,8 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    logout(state) {
+    // Local session teardown (used by the 401 handler — the token is already cleared/dead).
+    sessionExpired(state) {
       clearToken();
       state.user = null;
       state.status = 'unauthenticated';
@@ -100,5 +108,27 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { sessionExpired, clearError } = authSlice.actions;
+
+// Operator-initiated logout: best-effort server-side revoke of the refresh token (so a stolen
+// token can't be replayed), then tear down the local session. Always resolves — a failed
+// revoke still clears the client.
+export const logout = createAsyncThunk<void, void>(
+  'auth/logout',
+  async (_, { dispatch }) => {
+    const refreshToken = getRefreshToken();
+    if (refreshToken) {
+      try {
+        await apiFetch('/auth/logout', {
+          method: 'POST',
+          body: { refreshToken },
+        });
+      } catch {
+        // best-effort — clear the local session regardless
+      }
+    }
+    dispatch(sessionExpired());
+  },
+);
+
 export default authSlice.reducer;
