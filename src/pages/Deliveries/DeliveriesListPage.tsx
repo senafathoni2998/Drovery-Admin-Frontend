@@ -20,10 +20,11 @@ import {
   Typography,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 import StatusChip from '../../components/StatusChip';
+import SearchField from '../../components/SearchField';
+import { useListParams, toQueryString } from '../../hooks/useListParams';
 import { useApi } from '../../hooks/useApi';
 import type { AdminDelivery } from '../../models/admin';
 import type { Paginated } from '../../models/api';
@@ -34,28 +35,29 @@ const LIMIT = 20;
 
 export default function DeliveriesListPage() {
   const navigate = useNavigate();
-  const [page, setPage] = useState(0); // 0-based, for TablePagination
-  const [status, setStatus] = useState<DeliveryStatus | ''>('');
+  // Page + filter + search live in the URL, so going back from a record keeps the
+  // queue you were working and the view is shareable.
+  const { page, q, filter, setPage, setQ, setFilter } = useListParams();
+  const status = filter as DeliveryStatus | '';
 
-  const params = new URLSearchParams({
-    page: String(page + 1),
-    limit: String(LIMIT),
-  });
-  if (status) params.set('status', status);
   const { data, loading, error, refetch } = useApi<Paginated<AdminDelivery>>(
-    `/admin/deliveries?${params.toString()}`,
+    `/admin/deliveries?${toQueryString(page, LIMIT, q, 'status', status)}`,
   );
 
   const onStatusChange = (e: SelectChangeEvent<DeliveryStatus | ''>) => {
-    setStatus(e.target.value as DeliveryStatus | '');
-    setPage(0);
+    setFilter(e.target.value as string);
   };
 
   return (
     <Stack spacing={3}>
       <Typography variant="h4">Deliveries</Typography>
 
-      <Stack direction="row" spacing={2} alignItems="center">
+      <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+        <SearchField
+          value={q}
+          onChange={setQ}
+          placeholder="Tracking ID, address, receiver or customer email"
+        />
         <FormControl size="small" sx={{ minWidth: 220 }}>
           <InputLabel id="status-filter">Status</InputLabel>
           <Select<DeliveryStatus | ''>
@@ -105,14 +107,20 @@ export default function DeliveriesListPage() {
             </TableHead>
             <TableBody>
               {data?.items.map((d) => (
-                <TableRow
-                  key={d.id}
-                  hover
-                  sx={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/deliveries/${d.id}`)}
-                >
-                  <TableCell>{d.trackingId}</TableCell>
-                  <TableCell>
+                <TableRow key={d.id} hover sx={{ cursor: 'pointer' }}>
+                  {/* The id cell is a real anchor: keyboard-reachable, and
+                      middle/ctrl-click opens the record in a new tab. The row
+                      stays clickable for the mouse. */}
+                  <TableCell onClick={() => navigate(`/deliveries/${d.id}`)}>
+                    <Link
+                      to={`/deliveries/${d.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ color: 'inherit', fontWeight: 600 }}
+                    >
+                      {d.trackingId}
+                    </Link>
+                  </TableCell>
+                  <TableCell onClick={() => navigate(`/deliveries/${d.id}`)}>
                     <StatusChip status={d.status} />
                   </TableCell>
                   <TableCell>{d.trackingSource}</TableCell>
