@@ -152,7 +152,14 @@ export function openSupportSocket(opts: OpenSupportOptions): SupportConnection {
     if (!msg || typeof msg !== 'object') return;
     const obj = msg as Record<string, unknown>;
 
-    // ACK/response frames carry an `event`; broadcast messages do not.
+    // EVERY frame from this gateway is enveloped as { event, data } — acks and
+    // broadcasts alike. The broadcast is 'message:new' (SupportChatPublisher
+    // publishes {event:'message:new', data} and the gateway forwards that envelope
+    // verbatim), and it was the one case not handled here: it matched `'event' in
+    // obj`, fell through all three branches, and returned. Every inbound customer
+    // message was silently dropped while the chip read "Live". The bare-payload
+    // branch that used to follow was unreachable dead code — the gateway never
+    // sends an unwrapped payload.
     if ('event' in obj) {
       if (obj.event === 'subscribed') {
         clearSubscribe();
@@ -160,19 +167,12 @@ export function openSupportSocket(opts: OpenSupportOptions): SupportConnection {
         callbacks.onSubscribed();
       } else if (obj.event === 'error') {
         failHandle('subscribe-error');
-      } else if (obj.event === 'message:sent') {
+      } else if (obj.event === 'message:new' || obj.event === 'message:sent') {
+        // 'message:sent' is the sender's own synchronous ack; 'message:new' is the
+        // fan-out. A sender receives both, so the caller dedupes by message id.
         const data = obj.data as SupportChatMessage | undefined;
         if (data && data.ticketId === ticketId) callbacks.onMessage(data);
       }
-      return;
-    }
-    // Bare broadcast message payload.
-    if (
-      typeof obj.id === 'string' &&
-      obj.ticketId === ticketId &&
-      typeof obj.content === 'string'
-    ) {
-      callbacks.onMessage(obj as unknown as SupportChatMessage);
     }
   };
 
