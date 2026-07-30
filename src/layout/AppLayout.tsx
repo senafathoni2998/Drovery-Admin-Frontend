@@ -1,9 +1,4 @@
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import LogoutIcon from '@mui/icons-material/Logout';
-import PeopleIcon from '@mui/icons-material/People';
-import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import {
   AppBar,
   Box,
@@ -16,41 +11,16 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material';
-import type { ReactNode } from 'react';
 import { Suspense } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 
 import PageLoader from '../components/PageLoader';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { logout } from '../features/auth/authSlice';
-import type { Role } from '../models/enums';
+import { NAV_ITEMS } from './navItems';
 
 const DRAWER_WIDTH = 232;
 
-interface NavItem {
-  label: string;
-  path: string;
-  icon: ReactNode;
-  roles: Role[];
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', path: '/', icon: <DashboardIcon />, roles: ['ADMIN'] },
-  {
-    label: 'Deliveries',
-    path: '/deliveries',
-    icon: <LocalShippingIcon />,
-    roles: ['ADMIN'],
-  },
-  { label: 'Promos', path: '/promos', icon: <LocalOfferIcon />, roles: ['ADMIN'] },
-  { label: 'Users', path: '/users', icon: <PeopleIcon />, roles: ['ADMIN'] },
-  {
-    label: 'Support',
-    path: '/support',
-    icon: <SupportAgentIcon />,
-    roles: ['AGENT', 'ADMIN'],
-  },
-];
 
 export default function AppLayout() {
   const dispatch = useAppDispatch();
