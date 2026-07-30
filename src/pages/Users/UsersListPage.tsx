@@ -25,6 +25,8 @@ import { useState } from 'react';
 
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { adminApi } from '../../api/admin';
+import SearchField from '../../components/SearchField';
+import { useListParams, toQueryString } from '../../hooks/useListParams';
 import { useApi } from '../../hooks/useApi';
 import { useMutation } from '../../hooks/useMutation';
 import type { AdminUserListItem } from '../../models/admin';
@@ -35,16 +37,12 @@ import { ROLES, roleColor } from '../../models/enums';
 const LIMIT = 20;
 
 export default function UsersListPage() {
-  const [page, setPage] = useState(0);
-  const [roleFilter, setRoleFilter] = useState<Role | ''>('');
+  // URL-backed, so the view survives a refresh and can be shared.
+  const { page, q, filter, setPage, setQ, setFilter } = useListParams();
+  const roleFilter = filter as Role | '';
 
-  const params = new URLSearchParams({
-    page: String(page + 1),
-    limit: String(LIMIT),
-  });
-  if (roleFilter) params.set('role', roleFilter);
   const { data, loading, error, refetch } = useApi<Paginated<AdminUserListItem>>(
-    `/admin/users?${params.toString()}`,
+    `/admin/users?${toQueryString(page, LIMIT, q, 'role', roleFilter)}`,
   );
 
   const [editing, setEditing] = useState<AdminUserListItem | null>(null);
@@ -66,15 +64,19 @@ export default function UsersListPage() {
   };
 
   const onFilterChange = (e: SelectChangeEvent<Role | ''>) => {
-    setRoleFilter(e.target.value as Role | '');
-    setPage(0);
+    setFilter(e.target.value as Role | '' as string);
   };
 
   return (
     <Stack spacing={3}>
       <Typography variant="h4">Users</Typography>
 
-      <Stack direction="row" spacing={2} alignItems="center">
+      <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+        <SearchField
+          value={q}
+          onChange={setQ}
+          placeholder="Name or email"
+        />
         <FormControl size="small" sx={{ minWidth: 200 }}>
           <InputLabel id="role-filter">Role</InputLabel>
           <Select<Role | ''>
