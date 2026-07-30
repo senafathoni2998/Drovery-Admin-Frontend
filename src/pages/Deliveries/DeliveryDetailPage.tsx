@@ -137,9 +137,17 @@ export default function DeliveryDetailPage() {
   const d = delivery;
   const actions = deliveryActions(d);
 
-  const refresh = () => {
+  /** Refetch everything the page shows. The header button used to call `refetch`
+   *  alone, which reloads the delivery but NOT the drone command history — so a
+   *  dispatcher watching for an ABORT ack saw PENDING forever and issued a second
+   *  command to an aircraft that had already obeyed the first. */
+  const refreshAll = () => {
     refetch();
     refetchCommands();
+  };
+
+  const refresh = () => {
+    refreshAll();
     setDialog(null);
   };
 
@@ -197,7 +205,7 @@ export default function DeliveryDetailPage() {
         <StatusChip status={d.status} size="medium" />
         <Chip label={d.trackingSource} variant="outlined" size="small" />
         <Box sx={{ flexGrow: 1 }} />
-        <Button startIcon={<RefreshIcon />} onClick={refetch} disabled={loading}>
+        <Button startIcon={<RefreshIcon />} onClick={refreshAll} disabled={loading}>
           Refresh
         </Button>
       </Stack>
