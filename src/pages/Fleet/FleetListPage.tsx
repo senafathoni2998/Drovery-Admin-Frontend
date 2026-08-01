@@ -56,6 +56,7 @@ const EMPTY_FORM = {
   serial: '',
   model: '',
   maxPayloadKg: '',
+  rangeKm: '',
   homeBaseLat: '',
   homeBaseLng: '',
 };
@@ -91,6 +92,7 @@ export default function FleetListPage() {
     form.serial.trim() !== '' &&
     form.model.trim() !== '' &&
     Number(form.maxPayloadKg) > 0 &&
+    Number(form.rangeKm) > 0 &&
     form.homeBaseLat !== '' &&
     form.homeBaseLng !== '';
 
@@ -99,6 +101,7 @@ export default function FleetListPage() {
       serial: form.serial.trim(),
       model: form.model.trim(),
       maxPayloadKg: Number(form.maxPayloadKg),
+      rangeKm: Number(form.rangeKm),
       homeBaseLat: Number(form.homeBaseLat),
       homeBaseLng: Number(form.homeBaseLng),
     });
@@ -183,6 +186,7 @@ export default function FleetListPage() {
                   <TableCell>Status</TableCell>
                   <TableCell>Airworthy</TableCell>
                   <TableCell align="right">Max payload</TableCell>
+                  <TableCell align="right">Range</TableCell>
                   <TableCell align="right">Battery</TableCell>
                   <TableCell>Active delivery</TableCell>
                   <TableCell align="right">Actions</TableCell>
@@ -209,6 +213,7 @@ export default function FleetListPage() {
                       />
                     </TableCell>
                     <TableCell align="right">{d.maxPayloadKg} kg</TableCell>
+                    <TableCell align="right">{d.rangeKm} km</TableCell>
                     <TableCell align="right">{d.batteryPercent}%</TableCell>
                     <TableCell>
                       {d.activeDeliveryId ? (
@@ -259,13 +264,24 @@ export default function FleetListPage() {
               {...field('serial')}
             />
             <TextField label="Model" size="small" {...field('model')} />
-            <TextField
-              label="Max payload (kg)"
-              type="number"
-              size="small"
-              helperText="Dispatch refuses any package heavier than this."
-              {...field('maxPayloadKg')}
-            />
+            <Stack direction="row" spacing={2}>
+              <TextField
+                label="Max payload (kg)"
+                type="number"
+                size="small"
+                fullWidth
+                helperText="Dispatch refuses any package heavier than this."
+                {...field('maxPayloadKg')}
+              />
+              <TextField
+                label="Range (km)"
+                type="number"
+                size="small"
+                fullWidth
+                helperText="Still-air range at full charge. Dispatch spends only part of it: it derates for state of charge and payload, holds a reserve back, and must fit the whole out-and-back trip."
+                {...field('rangeKm')}
+              />
+            </Stack>
             <Stack direction="row" spacing={2}>
               <TextField
                 label="Home base latitude"
