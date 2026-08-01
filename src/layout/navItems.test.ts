@@ -24,6 +24,13 @@ describe('rolesForPath', () => {
     expect(rolesForPath('/support/t-1')).not.toEqual(['ADMIN']);
   });
 
+  it('guards /fleet — registering an aircraft is an ADMIN action', () => {
+    // The nav entry and the route guard come from the same list, so adding the page
+    // to the sidebar is what guarded it. An AGENT is redirected, not 403'd.
+    expect(rolesForPath('/fleet')).toEqual(['ADMIN']);
+    expect(rolesForPath('/fleet')).not.toContain('AGENT');
+  });
+
   it('returns no restriction for an unknown path', () => {
     expect(rolesForPath('/nope')).toEqual([]);
   });
