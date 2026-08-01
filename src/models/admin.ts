@@ -258,6 +258,8 @@ export interface AdminDrone {
   status: DroneStatus;
   airworthy: boolean;
   maxPayloadKg: number;
+  /** Still-air range at full charge, km. Dispatch derates this for charge and payload. */
+  rangeKm: number;
   batteryPercent: number;
   homeBaseLat: number;
   homeBaseLng: number;
@@ -275,6 +277,7 @@ export interface CreateDroneBody {
   serial: string;
   model: string;
   maxPayloadKg: number;
+  rangeKm: number;
   homeBaseLat: number;
   homeBaseLng: number;
   firmwareVersion?: string;
@@ -284,6 +287,7 @@ export interface UpdateDroneBody {
   status?: DroneStatus;
   airworthy?: boolean;
   maxPayloadKg?: number;
+  rangeKm?: number;
   batteryPercent?: number;
   firmwareVersion?: string;
 }
