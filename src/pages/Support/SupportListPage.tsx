@@ -21,9 +21,10 @@ import {
   Typography,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
-import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
+import SearchField from '../../components/SearchField';
+import { useListParams, toQueryString } from '../../hooks/useListParams';
 import { useApi } from '../../hooks/useApi';
 import type { AdminSupportTicketListItem } from '../../models/admin';
 import type { Paginated } from '../../models/api';
@@ -38,28 +39,27 @@ const LIMIT = 20;
 
 export default function SupportListPage() {
   const navigate = useNavigate();
-  const [page, setPage] = useState(0);
-  const [status, setStatus] = useState<SupportTicketStatus | ''>('');
+  const { page, q, filter, setPage, setQ, setFilter } = useListParams();
+  const status = filter as SupportTicketStatus | '';
 
-  const params = new URLSearchParams({
-    page: String(page + 1),
-    limit: String(LIMIT),
-  });
-  if (status) params.set('status', status);
   const { data, loading, error, refetch } = useApi<
     Paginated<AdminSupportTicketListItem>
-  >(`/admin/support/tickets?${params.toString()}`);
+  >(`/admin/support/tickets?${toQueryString(page, LIMIT, q, 'status', status)}`);
 
   const onStatusChange = (e: SelectChangeEvent<SupportTicketStatus | ''>) => {
-    setStatus(e.target.value as SupportTicketStatus | '');
-    setPage(0);
+    setFilter(e.target.value as string);
   };
 
   return (
     <Stack spacing={3}>
       <Typography variant="h4">Support inbox</Typography>
 
-      <Stack direction="row" spacing={2} alignItems="center">
+      <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+        <SearchField
+          value={q}
+          onChange={setQ}
+          placeholder="Message text, customer name or email"
+        />
         <FormControl size="small" sx={{ minWidth: 200 }}>
           <InputLabel id="ticket-status">Status</InputLabel>
           <Select<SupportTicketStatus | ''>

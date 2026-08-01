@@ -4,6 +4,7 @@ import { createBrowserRouter } from 'react-router';
 
 import PageLoader from '../components/PageLoader';
 import ProtectedRoute from '../layout/ProtectedRoute';
+import RequireRole from '../layout/RequireRole';
 
 // Route pages are code-split — each becomes its own chunk loaded on navigation. The shell
 // (ProtectedRoute + AppLayout) stays eager; AppLayout wraps <Outlet/> in its own Suspense, so
@@ -18,6 +19,7 @@ const DeliveryDetailPage = lazy(
 );
 const PromosListPage = lazy(() => import('../pages/Promos/PromosListPage'));
 const UsersListPage = lazy(() => import('../pages/Users/UsersListPage'));
+const FleetListPage = lazy(() => import('../pages/Fleet/FleetListPage'));
 const SupportListPage = lazy(() => import('../pages/Support/SupportListPage'));
 const SupportTicketDetailPage = lazy(
   () => import('../pages/Support/SupportTicketDetailPage'),
@@ -29,18 +31,26 @@ const withSuspense = (node: ReactNode): ReactNode => (
   <Suspense fallback={<PageLoader />}>{node}</Suspense>
 );
 
+const guarded = (node: ReactNode): ReactNode => (
+  <RequireRole>{node}</RequireRole>
+);
+
 export const router = createBrowserRouter([
   { path: '/login', element: withSuspense(<LoginPage />) },
   {
     element: <ProtectedRoute />,
     children: [
-      { path: '/', element: <DashboardPage /> },
-      { path: '/deliveries', element: <DeliveriesListPage /> },
-      { path: '/deliveries/:id', element: <DeliveryDetailPage /> },
-      { path: '/promos', element: <PromosListPage /> },
-      { path: '/users', element: <UsersListPage /> },
-      { path: '/support', element: <SupportListPage /> },
-      { path: '/support/:id', element: <SupportTicketDetailPage /> },
+      // Every protected route is role-guarded. Allowed roles come from NAV_ITEMS,
+      // so the sidebar and the guards cannot disagree — an AGENT is redirected to
+      // /support instead of landing on a Dashboard that 403s forever.
+      { path: '/', element: guarded(<DashboardPage />) },
+      { path: '/deliveries', element: guarded(<DeliveriesListPage />) },
+      { path: '/deliveries/:id', element: guarded(<DeliveryDetailPage />) },
+      { path: '/promos', element: guarded(<PromosListPage />) },
+      { path: '/users', element: guarded(<UsersListPage />) },
+      { path: '/fleet', element: guarded(<FleetListPage />) },
+      { path: '/support', element: guarded(<SupportListPage />) },
+      { path: '/support/:id', element: guarded(<SupportTicketDetailPage />) },
     ],
   },
   { path: '*', element: withSuspense(<NotFoundPage />) },

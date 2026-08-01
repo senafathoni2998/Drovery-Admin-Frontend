@@ -170,3 +170,19 @@ export function deliveryStatusTone(status: DeliveryStatus): StatusTone {
       return 'active';
   }
 }
+
+// ── Fleet ──
+export type DroneStatus =
+  | 'AVAILABLE'
+  | 'IN_FLIGHT'
+  | 'CHARGING'
+  | 'MAINTENANCE'
+  | 'GROUNDED';
+
+export const DRONE_STATUSES: DroneStatus[] = [
+  'AVAILABLE',
+  'IN_FLIGHT',
+  'CHARGING',
+  'MAINTENANCE',
+  'GROUNDED',
+];

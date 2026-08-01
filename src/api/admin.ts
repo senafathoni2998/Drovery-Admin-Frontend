@@ -1,5 +1,8 @@
 import type {
   AdminDelivery,
+  AdminDrone,
+  CreateDroneBody,
+  UpdateDroneBody,
   AdminRefundResponse,
   AdminSupportTicketStatusRow,
   AdminUserRole,
@@ -69,4 +72,21 @@ export const adminApi = {
       `/admin/support/tickets/${id}/status`,
       { method: 'PATCH', body: { status } },
     ),
+};
+
+// ── Fleet ──
+// Registering an aircraft is what makes a LIVE delivery possible at all: the backend
+// binds assignedDroneId as a foreign key and claims the row atomically, so with an
+// empty registry there is no aircraft to claim.
+export const fleetApi = {
+  create: (body: CreateDroneBody) =>
+    apiFetch<AdminDrone>('/admin/drones', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  update: (id: string, body: UpdateDroneBody) =>
+    apiFetch<AdminDrone>(`/admin/drones/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }),
 };

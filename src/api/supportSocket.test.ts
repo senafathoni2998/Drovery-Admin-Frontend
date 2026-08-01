@@ -93,13 +93,36 @@ describe('openSupportSocket frame handling', () => {
     expect(onSubscribed).toHaveBeenCalledOnce();
   });
 
-  it('delivers a BARE broadcast payload (no event field) as a message', async () => {
+  it("delivers the gateway's 'message:new' broadcast as a message", async () => {
+    // This is the frame the server actually sends: SupportChatPublisher publishes
+    // { event: 'message:new', data } and the gateway forwards that envelope
+    // verbatim. The client handled only 'subscribed' | 'error' | 'message:sent',
+    // so every inbound customer message was dropped while the chip read "Live" —
+    // and this test asserted a BARE payload the gateway never emits, so it passed
+    // against dead code.
     const onMessage = vi.fn();
     const { getWs } = open({ onMessage });
     await Promise.resolve();
-    getWs().message(msg({ id: 'abc', content: 'live!' }));
+    getWs().message({
+      event: 'message:new',
+      data: msg({ id: 'abc', content: 'live!' }),
+    });
     expect(onMessage).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'abc', content: 'live!' }),
+    );
+  });
+
+  it("still delivers the sender's own 'message:sent' ack", async () => {
+    // A sender receives both frames for their own message; the caller dedupes by id.
+    const onMessage = vi.fn();
+    const { getWs } = open({ onMessage });
+    await Promise.resolve();
+    getWs().message({
+      event: 'message:sent',
+      data: msg({ id: 'own-1', content: 'mine' }),
+    });
+    expect(onMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'own-1' }),
     );
   });
 
@@ -107,7 +130,15 @@ describe('openSupportSocket frame handling', () => {
     const onMessage = vi.fn();
     const { getWs } = open({ onMessage });
     await Promise.resolve();
-    getWs().message(msg({ ticketId: 'OTHER' }));
+    getWs().message({ event: 'message:new', data: msg({ ticketId: 'OTHER' }) });
+    expect(onMessage).not.toHaveBeenCalled();
+  });
+
+  it('ignores an unwrapped payload — the gateway never sends one', async () => {
+    const onMessage = vi.fn();
+    const { getWs } = open({ onMessage });
+    await Promise.resolve();
+    getWs().message(msg({ id: 'bare', content: 'nope' }));
     expect(onMessage).not.toHaveBeenCalled();
   });
 
