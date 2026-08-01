@@ -1,6 +1,7 @@
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import FlightIcon from '@mui/icons-material/Flight';
 import PeopleIcon from '@mui/icons-material/People';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import type { ReactNode } from 'react';
@@ -40,6 +41,12 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ['ADMIN'],
   },
   { label: 'Users', path: '/users', icon: <PeopleIcon />, roles: ['ADMIN'] },
+  {
+    label: 'Fleet',
+    path: '/fleet',
+    icon: <FlightIcon />,
+    roles: ['ADMIN'],
+  },
   {
     label: 'Support',
     path: '/support',
