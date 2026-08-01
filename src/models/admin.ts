@@ -12,6 +12,7 @@ import type {
   SupportChatSenderRole,
   SupportTicketStatus,
   TrackingSource,
+  DroneStatus,
 } from './enums';
 
 // ── Deliveries (admin oversight) — mirror of DeliveryResponseDto + the admin extras. ─────
@@ -246,4 +247,43 @@ export interface AdminSupportTicketDetail {
   updatedAt: string;
   user: AdminTicketUser;
   messages: SupportChatMessage[];
+}
+
+// ── Fleet ── GET/POST/PATCH /admin/drones
+export interface AdminDrone {
+  id: string;
+  serial: string;
+  model: string;
+  firmwareVersion: string | null;
+  status: DroneStatus;
+  airworthy: boolean;
+  maxPayloadKg: number;
+  batteryPercent: number;
+  homeBaseLat: number;
+  homeBaseLng: number;
+  currentLat: number | null;
+  currentLng: number | null;
+  flightHours: number;
+  flightCycles: number;
+  maintenanceDueAt: string | null;
+  activeDeliveryId: string | null;
+  lastSeenAt: string | null;
+  createdAt: string;
+}
+
+export interface CreateDroneBody {
+  serial: string;
+  model: string;
+  maxPayloadKg: number;
+  homeBaseLat: number;
+  homeBaseLng: number;
+  firmwareVersion?: string;
+}
+
+export interface UpdateDroneBody {
+  status?: DroneStatus;
+  airworthy?: boolean;
+  maxPayloadKg?: number;
+  batteryPercent?: number;
+  firmwareVersion?: string;
 }
