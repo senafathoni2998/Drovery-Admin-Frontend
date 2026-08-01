@@ -19,6 +19,7 @@ const DeliveryDetailPage = lazy(
 );
 const PromosListPage = lazy(() => import('../pages/Promos/PromosListPage'));
 const UsersListPage = lazy(() => import('../pages/Users/UsersListPage'));
+const FleetListPage = lazy(() => import('../pages/Fleet/FleetListPage'));
 const SupportListPage = lazy(() => import('../pages/Support/SupportListPage'));
 const SupportTicketDetailPage = lazy(
   () => import('../pages/Support/SupportTicketDetailPage'),
@@ -47,6 +48,7 @@ export const router = createBrowserRouter([
       { path: '/deliveries/:id', element: guarded(<DeliveryDetailPage />) },
       { path: '/promos', element: guarded(<PromosListPage />) },
       { path: '/users', element: guarded(<UsersListPage />) },
+      { path: '/fleet', element: guarded(<FleetListPage />) },
       { path: '/support', element: guarded(<SupportListPage />) },
       { path: '/support/:id', element: guarded(<SupportTicketDetailPage />) },
     ],
